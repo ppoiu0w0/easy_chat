@@ -15,15 +15,15 @@ class UserManager:
     def add_user(self, username, conn, addr):
         """중복된 닉네임 없을 때 유저 등록"""
         if username in self.users:
-            conn.send('중복된 아이디입니다.'.encode())
+            conn.send('---중복된 아이디입니다.---'.encode())
             return None
             
         with lock:
             self.users[username] = (conn, addr) 
 
         # 새로운 유저 입장 공지
-        self.send_message_to_all('[{}]님이 입장했습니다.'.format(username))
-        print(f'채팅 중 유저: {list(self.users.keys())}')
+        self.send_message_to_all('---[{}]님이 입장했습니다---'.format(username))
+        print(f'---채팅 중 유저---\n{list(self.users.keys())}')
 
         return username
 
@@ -37,7 +37,7 @@ class UserManager:
 
         # 유저 퇴장 공지
         self.send_message_to_all('[{}]님이 퇴장했습니다.'.format(username))
-        print(f'대화 참여자 수: [{len(self.users)}]')
+        print(f'---채팅 중 유저---\n{list(self.users.keys())}')
 
     def message_handler(self, username, msg):
         """메세지 처리(명령어면 실행, 일반적인 메세지면 모든 유저들에게 송신)"""
@@ -45,7 +45,7 @@ class UserManager:
             return None
 
         if msg[0] != '/':
-            self.send_message_to_all(f'[{username}] {msg}')
+            self.send_message_to_all(f'[{username}]: {msg}')
             return None
 
         # 명령어 실행('/q')
@@ -54,13 +54,13 @@ class UserManager:
             return -1  # 연결 종료
 
     def send_message_to_all(self, msg):
-        """모든 유저들에게 메시지 송신."""
+        """모든 유저들에게 메시지 송신"""
         with lock:
             for conn, addr in self.users.values():
                 try:
                     conn.send(msg.encode())
                 except Exception as e:
-                    print(f"Error sending message to {addr}: {e}")  # 송신 에러 처리
+                    print(f"---{addr}로의 송신 중 에러 발생---\n{e}")  # 송신 에러 처리
 
 
 class TcpHandler(socketserver.BaseRequestHandler):
@@ -70,11 +70,11 @@ class TcpHandler(socketserver.BaseRequestHandler):
 
     def handle(self):
         """새 클라이언트 연결 처리"""
-        print(f'{self.client_address[0]} 연결됨')
+        print(f'---{self.client_address[0]} 연결됨---')
 
         try:
             username = self.register_username()
-            print(f"새로운 유저 등록됨: {username}")
+            print(f"---새로운 유저 등록됨({username})---")
 
             while True:
                 msg = self.request.recv(1024)
