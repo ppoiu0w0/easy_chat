@@ -2,7 +2,7 @@ import socketserver
 import threading
 
 HOST = "localhost"
-PORT = 8081
+PORT = 8080
 lock = threading.Lock()
 
 
