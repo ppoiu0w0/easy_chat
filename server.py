@@ -7,23 +7,23 @@ lock = threading.Lock()
 
 
 class UserManager:
-    """클라이언트 연결/닉네임 등록/제거, 브로드캐스팅, 유저 커맨드 처리"""
+    """유저 등록/제거, 브로드캐스팅, 유저 커맨드 처리"""
 
     def __init__(self):
-        self.users = {}  # 유저 정보(연결 세션/주소) 저장
+        self.users = {}  # 유저 정보(소켓 객체/ ip 주소) 관리
 
     def add_user(self, username, conn, addr):
-        """중복된 닉네임 없을 때 유저 추가"""
+        """중복된 닉네임 없을 때 유저 등록"""
         if username in self.users:
             conn.send('중복된 아이디입니다.'.encode())
             return None
-
+            
         with lock:
-            self.users[username] = (conn, addr)
+            self.users[username] = (conn, addr) 
 
         # 새로운 유저 입장 공지
         self.send_message_to_all('[{}]님이 입장했습니다.'.format(username))
-        print(f'대화 참여자 수: [{len(self.users)}]')
+        print(f'채팅 중 유저: {list(self.users.keys())}')
 
         return username
 
